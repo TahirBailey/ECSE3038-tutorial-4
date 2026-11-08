@@ -35,11 +35,21 @@ def get_device(name: str):
     raise HTTPException(status_code=404, detail="No device called " + name)
 
 
+
 @app.post("/devices", status_code=201)
 def create_device(device: Device):
     new_device = device.model_dump()
+
+    for existing_device in readings:
+        if existing_device["name"] == new_device["name"]:
+            raise HTTPException(
+                status_code=409,
+                detail="A device called " + new_device["name"] + " already exists"
+            )
+
     readings.append(new_device)
     return new_device
+
 
 
 @app.put("/devices/{name}")
@@ -61,3 +71,4 @@ def delete_device(name: str):
             return {"deleted": name}
 
     raise HTTPException(status_code=404, detail="No device called " + name)
+
